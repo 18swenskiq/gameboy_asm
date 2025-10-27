@@ -98,7 +98,12 @@ int interrupt_get_enabled(void)
 
 void interrupt(unsigned int n)
 {
-	interrupt_IF |= n;
+	__asm__ (
+		"or DWORD PTR [%0], %1"
+		:
+		: "r" (&interrupt_IF), "r" (n)
+		: "memory"
+	);
 }
 
 unsigned char interrupt_get_IF(void)
@@ -119,4 +124,11 @@ unsigned char interrupt_get_mask(void)
 void interrupt_set_mask(unsigned char mask)
 {
 	interrupt_IE = mask;
+
+	__asm__ (
+		"mov DWORD PTR [%0], 0"
+		:                    /* no outputs */
+		: "r" (&enabled), "r"     /* inputs */
+		: "memory"           /* clobbers */
+	);
 }
