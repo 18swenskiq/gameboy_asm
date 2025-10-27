@@ -1,7 +1,9 @@
 SRC = $(wildcard *.c)
-OBJ = $(SRC:.c=.o)
+BUILD_DIR = build
+OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
-CFLAGS=-march=native -O3 -Wextra -Wall -Wno-switch -std=c99
+CC=gcc
+CFLAGS=-march=native -O3 -Wextra -Wall -Wno-switch -std=c99 -masm=intel
 LDFLAGS=-lSDL2
 
 all: clean gameboy
@@ -9,11 +11,14 @@ all: clean gameboy
 debug: CFLAGS += -g -DDEBUG=1
 debug: clean gameboy
 
-gameboy: $(OBJ)
-	$(CC) $(OBJ) $(CFLAGS) -o gameboy $(LDFLAGS) -fwhole-program
+gameboy: $(BUILD_DIR) $(OBJ)
+	$(CC) $(OBJ) $(CFLAGS) -o $(BUILD_DIR)/gameboy $(LDFLAGS) -fwhole-program
 
-%.o : %.c
-	$(CC) $(CFLAGS) -flto $^ -c
+$(BUILD_DIR)/%.o : %.c
+	$(CC) $(CFLAGS) -flto $^ -c -o $@
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
 clean:
-	$(RM) -f gameboy gameboy.exe *.o
+	$(RM) -rf $(BUILD_DIR)

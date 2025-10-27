@@ -73,12 +73,22 @@ int interrupt_enabled(void)
 
 void interrupt_enable(void)
 {
-	enabled = 1;
+	__asm__ (
+		"mov DWORD PTR [%0], 1"
+		:                    /* no outputs */
+		: "r" (&enabled)     /* inputs */
+		: "memory"           /* clobbers */
+	);
 }
 
 void interrupt_disable(void)
 {
-	enabled = 0;
+	__asm__ (
+		"mov DWORD PTR [%0], 0"
+		:                    /* no outputs */
+		: "r" (&enabled)     /* inputs */
+		: "memory"           /* clobbers */
+	);
 }
 
 int interrupt_get_enabled(void)
